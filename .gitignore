@@ -12,3 +12,5 @@ coverage/
 "*.log" 
 "serviceAccountKey.json" 
 ".env" 
+"serviceAccountKey.json" 
+".env" 
