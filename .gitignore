@@ -10,3 +10,5 @@ coverage/
 .idea/"serviceAccountKey.json" 
 ".env" 
 "*.log" 
+"serviceAccountKey.json" 
+".env" 
