@@ -83,3 +83,47 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
+
+
+
+// Add this near your other routes (before the 404 handler)
+app.get('/api/debug/mongo', async (req, res) => {
+    try {
+        // Check if mongoose is connected
+        const state = mongoose.connection.readyState;
+        // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+        const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+        
+        // Try a simple operation
+        let dbStatus = 'unknown';
+        let dbError = null;
+        
+        if (state === 1) {
+            try {
+                // Try to count users (lightweight operation)
+                const User = mongoose.model('User');
+                const count = await User.countDocuments();
+                dbStatus = `connected - found ${count} users`;
+            } catch (err) {
+                dbStatus = 'error';
+                dbError = err.message;
+            }
+        }
+        
+        res.json({
+            success: true,
+            mongooseState: states[state] || 'unknown',
+            readyState: state,
+            dbStatus: dbStatus,
+            dbError: dbError,
+            host: mongoose.connection.host,
+            name: mongoose.connection.name,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
