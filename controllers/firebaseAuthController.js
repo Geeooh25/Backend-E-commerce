@@ -180,26 +180,6 @@ const firebaseLogin = async (req, res) => {
                 console.log('✅ New user created in MongoDB');
             }
         }
-        const { sendEmail, templates } = require('../utils/emailService');
-
-
-
-// Generate verification link
-const verificationLink = await auth.generateEmailVerificationLink(email);
-console.log('✅ Verification link generated:', verificationLink);
-
-// Send email using Gmail
-try {
-    await sendEmail(
-        email,
-        'Verify your email - Beedaht Sweet Treats',
-        templates.verification(name, verificationLink)
-    );
-    console.log('✅ Verification email sent via Gmail');
-} catch (emailError) {
-    console.log('⚠️ Email sending failed:', emailError.message);
-    // Don't fail registration if email fails
-}
 
         // Generate your JWT
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
@@ -279,8 +259,6 @@ const firebaseForgotPassword = async (req, res) => {
         const resetLink = await auth.generatePasswordResetLink(email);
         console.log('✅ Password reset link generated for:', email);
         console.log('Reset link:', resetLink);
-
-        
 
         res.json({
             success: true,
@@ -538,8 +516,4 @@ module.exports = {
     firebaseUpdatePassword,
     firebaseDeleteUser,
     resendVerificationEmail
-}; 
-// Add this at the top of your firebaseRegister function 
-// Make sure to add these headers before res.json: 
-res.header('Access-Control-Allow-Origin', 'https://beedahttreats.netlify.app'); 
-res.header('Access-Control-Allow-Credentials', true); 
+};
