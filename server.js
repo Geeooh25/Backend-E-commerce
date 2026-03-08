@@ -5,7 +5,7 @@ const helmet = require('helmet');
 const compression = require('compression'); 
 const rateLimit = require('express-rate-limit'); 
 require('dotenv').config(); 
- 
+
 // Import routes 
 const authRoutes = require('./routes/auth'); 
 const firebaseAuthRoutes = require('./routes/firebaseAuth'); 
@@ -14,20 +14,20 @@ const orderRoutes = require('./routes/orders');
 const categoryRoutes = require('./routes/categories'); 
 const adminRoutes = require('./routes/admin'); 
 const paymentRoutes = require('./routes/payment'); 
- 
+
 const app = express(); 
- 
+
 // Security middleware 
 app.use(helmet()); 
 app.use(compression()); 
- 
+
 // Rate limiting 
 const limiter = rateLimit({ 
     windowMs: 15 * 60 * 1000, // 15 minutes 
     max: 100 // limit each IP to 100 requests per windowMs 
 }); 
 app.use('/api/', limiter); 
- 
+
 // CORS Configuration - UPDATED FOR NETLIFY 
 const corsOptions = { 
     origin: [ 
@@ -40,18 +40,19 @@ const corsOptions = {
     optionsSuccessStatus: 200 
 }; 
 app.use(cors(corsOptions)); 
- 
+
 // Body parser middleware 
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true })); 
- 
+
 // Database connection 
-    useNewUrlParser: true, 
-    useUnifiedTopology: true 
-}) 
-.then(() = MongoDB connected successfully')) 
-.catch(err = MongoDB connection error:', err)); 
- 
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/beedaht', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+.then(() => console.log('✅ MongoDB connected successfully')) 
+.catch(err => console.error('❌ MongoDB connection error:', err)); 
+
 // Routes 
 app.use('/api/auth', authRoutes); 
 app.use('/api/auth/firebase', firebaseAuthRoutes); 
@@ -60,19 +61,19 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/categories', categoryRoutes); 
 app.use('/api/admin', adminRoutes); 
 app.use('/api/payments', paymentRoutes); 
- 
+
 // ========== DEBUG ENDPOINT - MUST BE BEFORE 404 HANDLER ========== 
-app.get('/api/debug/mongo', async (req, res) =
+app.get('/api/debug/mongo', async (req, res) => {
     try { 
         // Check if mongoose is connected 
         const state = mongoose.connection.readyState; 
         // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting 
         const states = ['disconnected', 'connected', 'connecting', 'disconnecting']; 
- 
+
         // Try a simple operation 
         let dbStatus = 'unknown'; 
         let dbError = null; 
- 
+
         if (state === 1) { 
             try { 
                 // Try to count users (lightweight operation) 
@@ -84,9 +85,10 @@ app.get('/api/debug/mongo', async (req, res) =
                 dbError = err.message; 
             } 
         } 
- 
+
         res.json({ 
             success: true, 
+            mongooseState: states[state] || 'unknown',
             readyState: state, 
             dbStatus: dbStatus, 
             dbError: dbError, 
@@ -97,26 +99,29 @@ app.get('/api/debug/mongo', async (req, res) =
     } catch (error) { 
         res.status(500).json({ 
             success: false, 
-            error: error.message 
+            error: error.message
         }); 
     } 
 }); 
- 
+
 // ========== ERROR HANDLING MIDDLEWARE ========== 
-app.use((err, req, res, next) =
-    console.error('? Error:', err.stack); 
+app.use((err, req, res, next) => {
+    console.error('❌ Error:', err.stack); 
+    res.status(err.status || 500).json({ 
         success: false, 
+        message: err.message || 'Internal server error'
     }); 
 }); 
- 
+
 // ========== 404 HANDLER - MUST BE LAST ========== 
-app.use('*', (req, res) =
+app.use('*', (req, res) => {
     res.status(404).json({ 
         success: false, 
         message: 'Route not found' 
     }); 
 }); 
- 
-app.listen(PORT, () =
-    console.log(`?? Server running on port ${PORT}`); 
-}); 
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`); 
+});
