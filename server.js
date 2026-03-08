@@ -46,7 +46,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
 
 // ========== DATABASE CONNECTION WITH TIMEOUT OPTIONS ==========
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/beedaht', {
+// Using ONLY environment variable - no fallback to localhost
+mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     serverSelectionTimeoutMS: 30000, // 30 seconds timeout for server selection
@@ -55,6 +56,19 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/beedaht',
 })
 .then(() => console.log('✅ MongoDB connected successfully')) 
 .catch(err => console.error('❌ MongoDB connection error:', err)); 
+
+// Add connection event listeners for debugging
+mongoose.connection.on('connected', () => {
+    console.log('🟢 MongoDB connection established');
+});
+
+mongoose.connection.on('error', (err) => {
+    console.error('🔴 MongoDB connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+    console.log('🟡 MongoDB disconnected');
+});
 
 // Routes 
 app.use('/api/auth', authRoutes); 
@@ -106,6 +120,19 @@ app.get('/api/debug/mongo', async (req, res) => {
         }); 
     } 
 }); 
+
+// Add environment variable debug endpoint
+app.get('/api/debug/env', (req, res) => {
+    res.json({
+        success: true,
+        nodeEnv: process.env.NODE_ENV,
+        mongoUriExists: !!process.env.MONGODB_URI,
+        mongoUriPrefix: process.env.MONGODB_URI ? 
+            process.env.MONGODB_URI.substring(0, 30) + '...' : 'not set',
+        firebaseProjectId: process.env.FIREBASE_PROJECT_ID || 'not set',
+        hasFirebaseKey: !!process.env.FIREBASE_PRIVATE_KEY
+    });
+});
 
 // ========== ERROR HANDLING MIDDLEWARE ========== 
 app.use((err, req, res, next) => {
