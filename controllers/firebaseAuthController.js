@@ -538,4 +538,8 @@ module.exports = {
     firebaseUpdatePassword,
     firebaseDeleteUser,
     resendVerificationEmail
-};
+}; 
+// Add this at the top of your firebaseRegister function 
+// Make sure to add these headers before res.json: 
+res.header('Access-Control-Allow-Origin', 'https://beedahttreats.netlify.app'); 
+res.header('Access-Control-Allow-Credentials', true); 

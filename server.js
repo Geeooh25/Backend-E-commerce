@@ -33,7 +33,6 @@ const corsOptions = {
     credentials: true,
     optionsSuccessStatus: 200
 };
-app.use(cors(corsOptions));
 
 // Body parser middleware
 app.use(express.json());
@@ -77,3 +76,8 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+ 
+// CORS Configuration - ADDED FOR NETLIFY 
+const corsOptions = require('./cors-fix'); 
+app.use(cors(corsOptions)); 
+ 
