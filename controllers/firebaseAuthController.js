@@ -128,7 +128,7 @@ const firebaseRegister = async (req, res) => {
     }
 };
 
-// @desc    Login with Firebase
+// @desc    Login with Firebase (Google Sign-In)
 // @route   POST /api/auth/firebase/login
 // @access  Public
 const firebaseLogin = async (req, res) => {
@@ -152,10 +152,12 @@ const firebaseLogin = async (req, res) => {
         console.log('Decoded token:', {
             uid: decodedToken.uid,
             email: decodedToken.email,
-            email_verified: decodedToken.email_verified
+            email_verified: decodedToken.email_verified,
+            name: decodedToken.name || decodedToken.email?.split('@')[0]
         });
 
-        const { uid, email, name, email_verified } = decodedToken;
+        const { uid, email, email_verified } = decodedToken;
+        const name = decodedToken.name || email?.split('@')[0] || 'Google User';
 
         // Find or create user in MongoDB
         let user = await User.findOne({ firebaseUid: uid });
@@ -163,21 +165,26 @@ const firebaseLogin = async (req, res) => {
         if (!user) {
             console.log('User not found by UID, trying email...');
             user = await User.findOne({ email });
+            
             if (user) {
                 console.log('✅ Found user by email, linking with Firebase');
                 user.firebaseUid = uid;
                 user.isVerified = email_verified || false;
                 await user.save();
             } else {
-                console.log('Creating new user in MongoDB');
+                console.log('Creating new user in MongoDB for Google sign-in');
+                
+                // FIXED: Create user with a default phone value
                 user = await User.create({
-                    name: name || email.split('@')[0],
-                    email,
+                    name: name,
+                    email: email,
                     firebaseUid: uid,
                     isVerified: email_verified || false,
-                    password: Math.random().toString(36) // Random password since Firebase handles auth
+                    password: Math.random().toString(36), // Random password since Firebase handles auth
+                    phone: 'Google User', // ← FIXED: Add default phone value
+                    role: 'customer' // Default role
                 });
-                console.log('✅ New user created in MongoDB');
+                console.log('✅ New user created in MongoDB with default phone');
             }
         }
 
@@ -195,7 +202,7 @@ const firebaseLogin = async (req, res) => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                phone: user.phone,
+                phone: user.phone || 'Google User',
                 role: user.role,
                 isVerified: email_verified || false,
                 firebaseUid: uid

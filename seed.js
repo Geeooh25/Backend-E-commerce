@@ -254,9 +254,8 @@ const products = [
 const seedDatabase = async () => {
     try {
         // Connect to MongoDB
-        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/beedaht');
-        console.log('✅ Connected to MongoDB');
-
+        // Force use of production database
+await mongoose.connect('mongodb+srv://beedahttreats_db_user:n7okU8Bs9rhA9bF3@beedaht.x0grs6q.mongodb.net/beedaht_db?retryWrites=true&w=majority&appName=beedaht');
         // Clear existing products
         await Product.deleteMany({});
         console.log('✅ Cleared existing products');
