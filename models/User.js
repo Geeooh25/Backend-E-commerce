@@ -1,3 +1,4 @@
+// models/User.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -59,10 +60,9 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    // ✅ ADD WISHLIST HERE (inside the schema)
+    // ✅ FIXED: Allow both ObjectIds AND strings in wishlist
     wishlist: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product'
+        type: mongoose.Schema.Types.Mixed  // Changed from ObjectId to Mixed
     }]
 });
 
