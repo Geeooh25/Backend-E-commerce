@@ -58,7 +58,12 @@ const userSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
-    }
+    },
+    // ✅ ADD WISHLIST HERE (inside the schema)
+    wishlist: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product'
+    }]
 });
 
 // Encrypt password before saving
@@ -81,9 +86,3 @@ userSchema.methods.matchPassword = async function(enteredPassword) {
 };
 
 module.exports = mongoose.model('User', userSchema);
-
-// Add to userSchema
-wishlist: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product'
-}]
