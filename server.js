@@ -15,6 +15,9 @@ const categoryRoutes = require('./routes/categories');
 const adminRoutes = require('./routes/admin'); 
 const paymentRoutes = require('./routes/payment'); 
 const wishlistRoutes = require('./routes/wishlist');
+const newsletterRoutes = require('./routes/newsletter');
+const quickOrderRoutes = require('./routes/quickOrders');
+
 const app = express(); 
 
 // Security middleware 
@@ -79,6 +82,8 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/admin', adminRoutes); 
 app.use('/api/payments', paymentRoutes); 
 app.use('/api/wishlist', wishlistRoutes); 
+app.use('/api/newsletter', newsletterRoutes);
+app.use('/api/quick-orders', quickOrderRoutes);
 // ========== DEBUG ENDPOINT - MUST BE BEFORE 404 HANDLER ========== 
 app.get('/api/debug/mongo', async (req, res) => {
     try { 
