@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const { verifyAdminToken } = require('../middleware/adminAuth');
+const { protect, admin } = require('../middleware/auth');  // ✅ Use existing auth
 
 // Newsletter Schema
 const newsletterSchema = new mongoose.Schema({
@@ -17,7 +17,6 @@ router.post('/subscribe', async (req, res) => {
     try {
         const { email } = req.body;
         
-        // Check if already subscribed
         let subscriber = await Newsletter.findOne({ email });
         
         if (subscriber) {
@@ -28,19 +27,15 @@ router.post('/subscribe', async (req, res) => {
             return res.json({ success: true, message: 'Already subscribed' });
         }
         
-        // Create new subscriber
         subscriber = await Newsletter.create({ email });
-        
-        // You could add email notification here
-        
         res.json({ success: true, message: 'Subscribed successfully' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// Get all subscribers (admin only)
-router.get('/', verifyAdminToken, async (req, res) => {
+// Get all subscribers (admin only) - ✅ Use protect + admin
+router.get('/', protect, admin, async (req, res) => {
     try {
         const subscribers = await Newsletter.find().sort('-subscribedAt');
         res.json({ success: true, subscribers });
@@ -50,7 +45,7 @@ router.get('/', verifyAdminToken, async (req, res) => {
 });
 
 // Delete subscriber (admin only)
-router.delete('/:id', verifyAdminToken, async (req, res) => {
+router.delete('/:id', protect, admin, async (req, res) => {
     try {
         await Newsletter.findByIdAndDelete(req.params.id);
         res.json({ success: true, message: 'Subscriber deleted' });

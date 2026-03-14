@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const { protect, admin } = require('../middleware/auth');  // ✅ Use existing auth
 
 // Quick Order Schema
 const quickOrderSchema = new mongoose.Schema({
@@ -17,23 +18,15 @@ const QuickOrder = mongoose.models.QuickOrder || mongoose.model('QuickOrder', qu
 router.post('/', async (req, res) => {
     try {
         const { name, phone, details } = req.body;
-        
-        const order = await QuickOrder.create({
-            name,
-            phone,
-            details
-        });
-        
-        // You could add Telegram notification here
-        
+        const order = await QuickOrder.create({ name, phone, details });
         res.json({ success: true, order });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// Get all quick orders (admin only)
-router.get('/', async (req, res) => {
+// Get all quick orders (admin only) - ✅ Use protect + admin
+router.get('/', protect, admin, async (req, res) => {
     try {
         const orders = await QuickOrder.find().sort('-createdAt');
         res.json({ success: true, orders });
@@ -43,7 +36,7 @@ router.get('/', async (req, res) => {
 });
 
 // Update order status (admin only)
-router.put('/:id/status', async (req, res) => {
+router.put('/:id/status', protect, admin, async (req, res) => {
     try {
         const { status } = req.body;
         const order = await QuickOrder.findById(req.params.id);
@@ -62,7 +55,7 @@ router.put('/:id/status', async (req, res) => {
 });
 
 // Delete quick order (admin only)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', protect, admin, async (req, res) => {
     try {
         await QuickOrder.findByIdAndDelete(req.params.id);
         res.json({ success: true, message: 'Quick order deleted' });
