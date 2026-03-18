@@ -43,7 +43,26 @@ const corsOptions = {
     credentials: true, 
     optionsSuccessStatus: 200 
 }; 
+// Add trust proxy setting for rate limiting (fixes the warning)
+app.set('trust proxy', 1); // ADD THIS LINE
 app.use(cors(corsOptions)); 
+// Add trust proxy setting for rate limiting (fixes the warning)
+app.set('trust proxy', 1); // Add this line
+
+// Add this debugging middleware to see what's being sent
+app.use('/api/wishlist/*', (req, res, next) => {
+    console.log('🔍 Wishlist Request:', {
+        method: req.method,
+        url: req.url,
+        params: req.params,
+        body: req.body,
+        headers: {
+            authorization: req.headers.authorization ? 'Present' : 'Missing',
+            origin: req.headers.origin
+        }
+    });
+    next();
+});
 
 // Add explicit OPTIONS handling for preflight requests
 app.options('*', cors(corsOptions)); // This ensures preflight requests are handled 
