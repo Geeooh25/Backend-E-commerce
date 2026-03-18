@@ -30,8 +30,7 @@ const limiter = rateLimit({
     max: 100 // limit each IP to 100 requests per windowMs 
 }); 
 app.use('/api/', limiter); 
-
-// CORS Configuration - UPDATED FOR NETLIFY 
+// CORS Configuration - UPDATED FOR NETLIFY WITH FULL SUPPORT FOR WISHLIST
 const corsOptions = { 
     origin: [ 
         'https://beedahttreats.netlify.app',  // Your Netlify frontend 
@@ -39,10 +38,15 @@ const corsOptions = {
         'http://127.0.0.1:5500',               // Local development alternative 
         'http://localhost:3000'                 // Alternative local port 
     ], 
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Explicitly allow all needed methods
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'], // Allow authorization headers
     credentials: true, 
     optionsSuccessStatus: 200 
 }; 
 app.use(cors(corsOptions)); 
+
+// Add explicit OPTIONS handling for preflight requests
+app.options('*', cors(corsOptions)); // This ensures preflight requests are handled 
 
 // Body parser middleware 
 app.use(express.json()); 
