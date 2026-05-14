@@ -182,7 +182,7 @@ const firebaseLogin = async (req, res) => {
                     isVerified: email_verified || false,
                     password: Math.random().toString(36), // Random password since Firebase handles auth
                     phone: 'Google User', // ← FIXED: Add default phone value
-                    role: 'customer' // Default role
+                    role: 'user' // Default role
                 });
                 console.log('✅ New user created in MongoDB with default phone');
             }
